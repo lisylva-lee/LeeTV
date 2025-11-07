@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div align="center">
 
 [![English Doc](https://img.shields.io/badge/Doc-English-blue)](README_EN.md)
@@ -1005,3 +1006,6 @@ services:
 Made with ❤️ by LunaTV Enhanced Edition Team
 
 </div>
+=======
+# LeeTV
+>>>>>>> 014e052eb7ba39a0d523c4396adfe7da6edf3028
