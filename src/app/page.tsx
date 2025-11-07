@@ -463,16 +463,21 @@ function HomeClient() {
       {/* Telegram 新用户欢迎弹窗 */}
       <TelegramWelcomeModal />
 
-      <div className='overflow-visible -mt-6 md:mt-0'>
-        {/* 欢迎横幅 - 现代化精简设计 */}
-        <div className='mb-6 relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-500/90 via-purple-500/90 to-pink-500/90 backdrop-blur-sm shadow-xl border border-white/20'>
-          <div className='relative p-4 sm:p-5'>
-            {/* 动态渐变背景 */}
-            <div className='absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/5'></div>
-
-            <div className='relative z-10 flex items-center justify-between gap-4'>
+      {/* 右侧滑入的欢迎悬浮窗 */}
+      <div
+        className={`fixed top-20 right-4 z-[9999] transition-all duration-500 ease-out ${showWelcomeToast
+          ? 'translate-x-0 opacity-100'
+          : 'translate-x-[120%] opacity-0 pointer-events-none'
+          }`}
+      >
+        <div className='relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-[2px] shadow-2xl'>
+          <div className='relative bg-white dark:bg-gray-900 rounded-xl px-5 py-3 backdrop-blur-sm'>
+            <div className='flex items-center gap-3'>
+              <div className='flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center'>
+                <span className='text-xl animate-wave origin-bottom-right'>👋</span>
+              </div>
               <div className='flex-1 min-w-0'>
-                <h2 className='text-lg sm:text-xl font-bold text-white mb-1 flex items-center gap-2 flex-wrap'>
+                <div className='text-base font-bold text-gray-900 dark:text-white flex items-center gap-1.5 flex-wrap'>
                   <span>
                     {(() => {
                       const hour = new Date().getHours();
@@ -483,24 +488,37 @@ function HomeClient() {
                     {username && '，'}
                   </span>
                   {username && (
-                    <span className='text-yellow-300 font-semibold'>
+                    <span className='text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400'>
                       {username}
                     </span>
                   )}
-                  <span className='inline-block animate-wave origin-bottom-right'>👋</span>
-                </h2>
-                <p className='text-sm text-white/90'>
+                </div>
+                <p className='text-xs text-gray-600 dark:text-gray-400 mt-0.5'>
                   发现更多精彩影视内容 ✨
                 </p>
               </div>
-
-              {/* 装饰图标 - 更小更精致 */}
-              <div className='hidden md:flex items-center justify-center flex-shrink-0 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20'>
-                <Film className='w-6 h-6 text-white' />
-              </div>
+              <button
+                onClick={() => setShowWelcomeToast(false)}
+                className='flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors'
+                aria-label='关闭'
+              >
+                <svg className='w-4 h-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
+      </div>
+
+      <div className='px-2 sm:px-10 py-4 sm:py-8 overflow-visible'>
+
+        {/* 轮播图 - 在所有tab显示（根据配置） */}
+        {enableTMDBCarousel && (
+          <div className={`mt-8 sm:mt-12 mb-8 ${layoutMode === 'top' ? 'md:-mt-4' : ''}`}>
+            <HomeCarousel doubanMovies={hotMovies} />
+          </div>
+        )}
 
         {/* 顶部 Tab 切换 */}
         <div className='mb-8 flex flex-col sm:flex-row items-center justify-center gap-4'>
