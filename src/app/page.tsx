@@ -52,6 +52,7 @@ function HomeClient() {
   const [username, setUsername] = useState<string>('');
 
   const [showAnnouncement, setShowAnnouncement] = useState(false);
+  const [showWelcomeToast, setShowWelcomeToast] = useState(false); // 新增欢迎悬浮窗状态
   const [showAIRecommendModal, setShowAIRecommendModal] = useState(false);
   const [aiEnabled, setAiEnabled] = useState<boolean | null>(true); // 默认显示，检查后再决定
   const [aiCheckTriggered, setAiCheckTriggered] = useState(false); // 标记是否已检查AI状态
@@ -137,6 +138,23 @@ function HomeClient() {
     };
   }, [aiCheckTriggered]);
 
+  // 新增：欢迎悬浮窗逻辑
+  useEffect(() => {
+    // 当获取到用户名且本会话未显示过欢迎语时，显示悬浮窗
+    if (username && !sessionStorage.getItem('hasSeenWelcomeToast')) {
+      setShowWelcomeToast(true);
+      sessionStorage.setItem('hasSeenWelcomeToast', 'true');
+
+      // 5秒后自动隐藏
+      const timer = setTimeout(() => {
+        setShowWelcomeToast(false);
+      }, 5000);
+
+      // 组件卸载时清除定时器
+      return () => clearTimeout(timer);
+    }
+  }, [username]); // 依赖于 username
+
   // 收藏夹数据
   type FavoriteItem = {
     id: string;
@@ -200,8 +218,8 @@ function HomeClient() {
               return null;
             })
           ).then((results) => {
-            setHotMovies(prev =>
-              prev.map(m => {
+            setHotMovies((prev: DoubanItem[]) =>
+              prev.map((m: DoubanItem) => {
                 const detail = results.find(r => r?.id === m.id);
                 return detail ? { ...m, plot_summary: detail.plot_summary } : m;
               })
@@ -230,8 +248,8 @@ function HomeClient() {
               return null;
             })
           ).then((results) => {
-            setHotTvShows(prev =>
-              prev.map(s => {
+            setHotTvShows((prev: DoubanItem[]) =>
+              prev.map((s: DoubanItem) => {
                 const detail = results.find(r => r?.id === s.id);
                 return detail ? { ...s, plot_summary: detail.plot_summary } : s;
               })
@@ -252,8 +270,8 @@ function HomeClient() {
             getDoubanDetails(show.id)
               .then((detailsRes) => {
                 if (detailsRes.code === 200 && detailsRes.data?.plot_summary) {
-                  setHotVarietyShows(prev =>
-                    prev.map(s => s.id === show.id
+                  setHotVarietyShows((prev: DoubanItem[]) =>
+                    prev.map((s: DoubanItem) => s.id === show.id
                       ? { ...s, plot_summary: detailsRes.data!.plot_summary }
                       : s
                     )
@@ -290,8 +308,8 @@ function HomeClient() {
               return null;
             })
           ).then((results) => {
-            setHotShortDramas(prev =>
-              prev.map(d => {
+            setHotShortDramas((prev: ShortDramaItem[]) =>
+              prev.map((d: ShortDramaItem) => {
                 const detail = results.find(r => r?.id === d.id);
                 return detail ? { ...d, description: detail.description } : d;
               })
@@ -324,12 +342,12 @@ function HomeClient() {
                 const detailData = await response.json();
                 if (detailData.summary) {
                   // 更新 bangumiCalendarData 中对应的番剧
-                  setBangumiCalendarData(prev =>
-                    prev.map(dayData => {
+                  setBangumiCalendarData((prev: BangumiCalendarData[]) =>
+                    prev.map((dayData: BangumiCalendarData) => {
                       if (dayData.weekday.en === currentWeekday) {
                         return {
                           ...dayData,
-                          items: dayData.items.map(item =>
+                          items: dayData.items.map((item: any) =>
                             item.id === anime.id
                               ? { ...item, summary: detailData.summary }
                               : item
