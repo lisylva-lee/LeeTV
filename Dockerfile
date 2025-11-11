@@ -26,14 +26,14 @@ RUN pnpm install --frozen-lockfile --offline || pnpm install --frozen-lockfile -
 # 复制全部源代码
 COPY . .
 
+# 确保依赖完整性并安装所有依赖
+RUN pnpm install --frozen-lockfile --no-optional --strict-peer-dependencies=false
+
 # 在构建阶段也显式设置 DOCKER_ENV，
 ENV DOCKER_ENV=true
 
-# 在构建阶段添加调试日志，捕获 pnpm run build 的错误
-RUN echo "Starting build process..." && pnpm run build || (echo "Build failed. Logs:" && cat /app/.next/trace)
-
 # 生成生产构建
-RUN echo "Building project..." && pnpm run build
+RUN echo "Building project..." && pnpm run build || (echo "Build failed. Logs:" && cat /app/.next/trace)
 
 # ---- 第 3 阶段：生成运行时镜像 ----
 FROM node:20-alpine AS runner
