@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 
 # 清理任何潜在的缓存并安装所有依赖
-RUN pnpm store prune && pnpm install --frozen-lockfile --no-optional
+RUN pnpm store prune && pnpm install --frozen-lockfile --no-optional --strict-peer-dependencies=false
 
 # ---- 第 2 阶段：构建项目 ----
 FROM node:20-alpine AS builder
@@ -22,15 +22,18 @@ COPY package.json pnpm-lock.yaml ./
 # 复制依赖
 COPY --from=deps /app/node_modules ./node_modules
 # 验证依赖完整性，如果不匹配则重新安装
-RUN pnpm install --frozen-lockfile --offline || pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --offline || pnpm install --frozen-lockfile --strict-peer-dependencies=false
 # 复制全部源代码
 COPY . .
 
 # 在构建阶段也显式设置 DOCKER_ENV，
 ENV DOCKER_ENV=true
 
+# 在构建阶段添加调试日志，捕获 pnpm run build 的错误
+RUN echo "Starting build process..." && pnpm run build || (echo "Build failed. Logs:" && cat /app/.next/trace)
+
 # 生成生产构建
-RUN pnpm run build
+RUN echo "Building project..." && pnpm run build
 
 # ---- 第 3 阶段：生成运行时镜像 ----
 FROM node:20-alpine AS runner
@@ -60,4 +63,4 @@ USER nextjs
 EXPOSE 3000
 
 # 使用自定义启动脚本，先预加载配置再启动服务器
-CMD ["node", "start.js"] 
+CMD ["node", "start.js"]
